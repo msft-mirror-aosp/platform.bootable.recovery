@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "otautil/verifier.h"
+#include "install/verifier.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -257,8 +257,8 @@ int verify_file(VerifierInterface* package, const std::vector<Certificate>& keys
 
   // Check to make sure at least one of the keys matches the signature. Since any key can match,
   // we need to try each before determining a verification failure has happened.
-  for (size_t i = 0; i < keys.size(); i++) {
-    const auto& key = keys[i];
+  size_t i = 0;
+  for (const auto& key : keys) {
     const uint8_t* hash;
     int hash_nid;
     switch (key.hash_len) {
@@ -296,6 +296,7 @@ int verify_file(VerifierInterface* package, const std::vector<Certificate>& keys
     } else {
       LOG(INFO) << "Unknown key type " << key.key_type;
     }
+    i++;
   }
 
   if (need_sha1) {
