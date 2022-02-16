@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "otautil/package.h"
+#include "install/package.h"
 #include "recovery_ui/device.h"
 
 // Wipes the current A/B device, with a secure wipe of all the partitions in RECOVERY_WIPE.
