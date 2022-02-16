@@ -59,23 +59,16 @@ class MinuiBackendDrm : public MinuiBackend {
   GRSurface* Init() override;
   GRSurface* Flip() override;
   void Blank(bool) override;
-  void Blank(bool blank, DrmConnector index) override;
 
  private:
   void DrmDisableCrtc(int drm_fd, drmModeCrtc* crtc);
-  bool DrmEnableCrtc(int drm_fd, drmModeCrtc* crtc, const std::unique_ptr<GRSurfaceDrm>& surface,
-                     uint32_t* conntcors);
+  bool DrmEnableCrtc(int drm_fd, drmModeCrtc* crtc, const std::unique_ptr<GRSurfaceDrm>& surface);
   void DisableNonMainCrtcs(int fd, drmModeRes* resources, drmModeCrtc* main_crtc);
-  bool FindAndSetMonitor(int fd, drmModeRes* resources);
+  drmModeConnector* FindMainMonitor(int fd, drmModeRes* resources, uint32_t* mode_index);
 
-  struct DrmInterface {
-    std::unique_ptr<GRSurfaceDrm> GRSurfaceDrms[2];
-    int current_buffer{ 0 };
-    drmModeCrtc* monitor_crtc{ nullptr };
-    drmModeConnector* monitor_connector{ nullptr };
-    uint32_t selected_mode{ 0 };
-  } drm[DRM_MAX];
-
+  std::unique_ptr<GRSurfaceDrm> GRSurfaceDrms[2];
+  int current_buffer{ 0 };
+  drmModeCrtc* main_monitor_crtc{ nullptr };
+  drmModeConnector* main_monitor_connector{ nullptr };
   int drm_fd{ -1 };
-  DrmConnector active_display = DRM_MAIN;
 };
