@@ -76,6 +76,12 @@ int SimulatorRuntime::RunProgram(const std::vector<std::string>& args, bool /* i
   return 0;
 }
 
+int SimulatorRuntime::RunProgram(const std::vector<std::string>& args,
+                                 std::string* /* result */) const {
+  LOG(INFO) << "Running program with args " << android::base::Join(args, " ");
+  return 0;
+}
+
 int SimulatorRuntime::Tune2Fs(const std::vector<std::string>& args) const {
   LOG(INFO) << "Running Tune2Fs with args " << android::base::Join(args, " ");
   return 0;
