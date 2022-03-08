@@ -382,6 +382,49 @@ Value* UnmountFn(const char* name, State* state, const std::vector<std::unique_p
   return StringValue(mount_point);
 }
 
+enum class FSTools {
+  FS_TOOL_MK_F2FS = 0,
+  FS_TOOL_SLOAD_F2FS,
+  FS_TOOL_MKE2FS,
+  FS_TOOL_E2FSDROID,
+};
+
+/*
+* Helper function to check file system tools in recovery rootfs
+* for various android versions
+*/
+static const char* GetFsToolPath(FSTools e_fs_tool) {
+  static const std::vector<const char*> fs_tool_data[] = {
+    // FS_TOOL_MK_F2FS
+    {
+      "/system/bin/make_f2fs",
+      "/sbin/mkfs.f2fs",
+    },
+    // FS_TOOL_SLOAD_F2FS
+    {
+      "/system/bin/sload_f2fs",
+      "/sbin/sload.f2fs",
+    },
+    // FS_TOOL_MKE2FS
+    {
+      "/system/bin/mke2fs",
+      "/sbin/mke2fs_static",
+    },
+    // FS_TOOL_E2FSDROID
+    {
+      "/system/bin/e2fsdroid",
+      "/sbin/e2fsdroid_static",
+    }
+  };
+
+  for (auto const& tool : fs_tool_data[static_cast<int>(e_fs_tool)]) {
+    if (access(tool, X_OK) == 0) {
+      return tool;
+    }
+  }
+  return nullptr;
+}
+
 // format(fs_type, partition_type, location, fs_size, mount_point)
 //
 //    fs_type="ext4"  partition_type="EMMC"  location=device  fs_size=<bytes> mount_point=<location>
@@ -428,8 +471,13 @@ Value* FormatFn(const char* name, State* state, const std::vector<std::unique_pt
 
   auto updater_runtime = state->updater->GetRuntime();
   if (fs_type == "ext4") {
+    const char* mke2fs_path = GetFsToolPath(FSTools::FS_TOOL_MKE2FS);
+    if (mke2fs_path == nullptr){
+      LOG(ERROR) << name << ": could not locate mke2fs tool";
+      return StringValue("");
+    }
     std::vector<std::string> mke2fs_args = {
-      "/system/bin/mke2fs", "-t", "ext4", "-b", "4096", location
+      mke2fs_path, "-t", "ext4", "-b", "4096", location
     };
     if (size != 0) {
       mke2fs_args.push_back(std::to_string(size / 4096LL));
@@ -440,8 +488,13 @@ Value* FormatFn(const char* name, State* state, const std::vector<std::unique_pt
       return StringValue("");
     }
 
+    const char* e2fsdroid_path = GetFsToolPath(FSTools::FS_TOOL_E2FSDROID);
+    if (e2fsdroid_path == nullptr) {
+      LOG(ERROR) << name << ": could not locate e2fsdroid tool";
+      return StringValue("");
+    }
     if (auto status = updater_runtime->RunProgram(
-            { "/system/bin/e2fsdroid", "-e", "-a", mount_point, location }, true);
+            { e2fsdroid_path, "-e", "-a", mount_point, location }, true);
         status != 0) {
       LOG(ERROR) << name << ": e2fsdroid failed (" << status << ") on " << location;
       return StringValue("");
@@ -454,19 +507,71 @@ Value* FormatFn(const char* name, State* state, const std::vector<std::unique_pt
       LOG(ERROR) << name << ": fs_size can't be negative for f2fs: " << fs_size;
       return StringValue("");
     }
-    std::vector<std::string> f2fs_args = {
-      "/system/bin/make_f2fs", "-g", "android", "-w", "512", location
-    };
+    const char* make_f2fs_path = GetFsToolPath(FSTools::FS_TOOL_MK_F2FS);
+    if (make_f2fs_path == nullptr) {
+      LOG(ERROR) << name << ": could not locate make_f2fs tool";
+      return StringValue("");
+    }
+    std::vector<std::string> f2fs_args;
+
+    /*
+     * check if old version of mkfs.f2fs is used
+     * version string format : mkfs.f2fs %d.%d.%d (yyyy-mm-dd)
+     */
+
+    std::string mk_f2fs_version;
+    f2fs_args = {make_f2fs_path, "-V"};
+    int exit_code = updater_runtime->RunProgram(f2fs_args, &mk_f2fs_version);
+    if (exit_code == 0) {
+      int v[3];
+      char c[2];
+      if (mk_f2fs_version.size() > strlen("mkfs.f2fs ") &&
+          sscanf (mk_f2fs_version.c_str() + strlen("mkfs.f2fs "), "%d%c%d%c%d",
+                                        &v[0], &c[0], &v[1], &c[1], &v[2]) == 5) {
+        LOG(INFO) << name << ": found mkfs.f2fs ver: " << std::to_string(v[0])
+                                                <<"." << std::to_string(v[1])
+                                                <<"." << std::to_string(v[2]);
+      } else {
+        exit_code = -1;
+        LOG(WARNING) << name << ": invalid mkfs.f2fs version: " << mk_f2fs_version
+          << "\nOlder version (mkfs.f2fs Ver: 1.10.0) might be used";
+      }
+    } else {
+      LOG(WARNING) << name << ": old version of mkfs.f2fs is used ";
+    }
+
+    if (exit_code != 0) {
+      f2fs_args = {
+            make_f2fs_path,
+            "-d1",
+            "-f",
+            "-O", "encrypt",
+            "-O", "quota",
+            "-O", "verity",
+            "-w", "512",
+            location
+      };
+    } else {
+      f2fs_args = {
+        make_f2fs_path, "-g", "android", "-w", "512", location
+      };
+    }
+
     if (size >= 512) {
       f2fs_args.push_back(std::to_string(size / 512));
     }
+
     if (auto status = updater_runtime->RunProgram(f2fs_args, true); status != 0) {
       LOG(ERROR) << name << ": make_f2fs failed (" << status << ") on " << location;
       return StringValue("");
     }
-
+    const char* sload_f2fs_path = GetFsToolPath(FSTools::FS_TOOL_SLOAD_F2FS);
+    if (sload_f2fs_path == nullptr) {
+      LOG(ERROR) << name << ": could not locate sload_f2fs tool";
+      return StringValue("");
+    }
     if (auto status = updater_runtime->RunProgram(
-            { "/system/bin/sload_f2fs", "-t", mount_point, location }, true);
+            { sload_f2fs_path, "-t", mount_point, location }, true);
         status != 0) {
       LOG(ERROR) << name << ": sload_f2fs failed (" << status << ") on " << location;
       return StringValue("");
