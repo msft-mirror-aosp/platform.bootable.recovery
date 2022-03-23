@@ -43,10 +43,6 @@ void MinuiBackendFbdev::Blank(bool blank) {
   if (ret < 0) perror("ioctl(): blank");
 }
 
-void MinuiBackendFbdev::Blank(bool blank, DrmConnector index) {
-  fprintf(stderr, "Unsupported multiple connectors, blank = %d, index = %d\n", blank, index);
-}
-
 void MinuiBackendFbdev::SetDisplayedFramebuffer(size_t n) {
   if (n > 1 || !double_buffered) return;
 
@@ -135,6 +131,8 @@ GRSurface* MinuiBackendFbdev::Init() {
   SetDisplayedFramebuffer(0);
 
   printf("framebuffer: %d (%zu x %zu)\n", fb_fd.get(), gr_draw->width, gr_draw->height);
+
+  Blank(true);
   Blank(false);
 
   return gr_draw;

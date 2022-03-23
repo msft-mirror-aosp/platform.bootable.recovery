@@ -24,8 +24,7 @@
 
 #include <ziparchive/zip_archive.h>
 
-#include "otautil/package.h"
-#include "recovery_ui/device.h"
+#include "package.h"
 #include "recovery_ui/ui.h"
 
 enum InstallResult {
@@ -50,8 +49,7 @@ enum class OtaType {
 // cache partition after a successful installation if |should_wipe_cache| is true or an updater
 // command asks to wipe the cache.
 InstallResult InstallPackage(Package* package, const std::string_view package_id,
-                             bool should_wipe_cache, int retry_count,
-                             Device* ui);
+                             bool should_wipe_cache, int retry_count, RecoveryUI* ui);
 
 // Verifies the package by ota keys. Returns true if the package is verified successfully,
 // otherwise returns false.
