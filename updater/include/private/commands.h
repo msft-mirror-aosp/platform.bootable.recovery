@@ -307,7 +307,7 @@ class Command {
       : type_(type),
         index_(index),
         cmdline_(std::move(cmdline)),
-        patch_(patch),
+        patch_(std::move(patch)),
         target_(std::move(target)),
         source_(std::move(source)),
         stash_(std::move(stash)) {}

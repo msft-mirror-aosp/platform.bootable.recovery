@@ -34,6 +34,7 @@ updater_common_static_libraries := \
     libfec_rs \
     libavb \
     libverity_tree \
+    libgtest_prod \
     liblog \
     liblp \
     libselinux \
@@ -71,9 +72,6 @@ endef
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := updater
-LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
-LOCAL_LICENSE_CONDITIONS := notice
-LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../NOTICE
 
 LOCAL_SRC_FILES := \
     updater_main.cpp
@@ -94,8 +92,6 @@ LOCAL_STATIC_LIBRARIES := \
     libfs_mgr \
     libtune2fs \
     $(tune2fs_static_libraries)
-
-LOCAL_HEADER_LIBRARIES := libgtest_prod_headers
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 inc := $(call local-generated-sources-dir)/register.inc

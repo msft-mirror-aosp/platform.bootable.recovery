@@ -128,6 +128,7 @@ bool Command::ParseTargetInfoAndSourceInfo(const std::vector<std::string>& token
       // No stashes, only source ranges.
       SourceInfo result(src_hash, src_ranges, {}, {});
 
+      // Sanity check the block count.
       if (result.blocks() != src_blocks) {
         *err =
             android::base::StringPrintf("mismatching block count: %zu (%s) vs %zu", result.blocks(),
@@ -261,7 +262,7 @@ Command Command::Parse(const std::string& line, size_t index, std::string* err) 
       return {};
     }
   } else if (op == Type::ABORT) {
-    // Abort takes no arguments, so there's nothing else to check.
+    // No-op, other than sanity checking the input args.
     if (pos != tokens.size()) {
       *err = android::base::StringPrintf("invalid number of args: %zu (expected 0)",
                                          tokens.size() - pos);

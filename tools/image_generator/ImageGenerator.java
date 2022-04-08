@@ -113,30 +113,30 @@ public class ImageGenerator {
     private static final Map<String, String> LANGUAGE_TO_FONT_MAP =
             new TreeMap<String, String>() {
                 {
-                    put("am", "NotoSansEthiopic-VF");
+                    put("am", "NotoSansEthiopic-Regular");
                     put("ar", "NotoNaskhArabicUI-Regular");
-                    put("as", "NotoSansBengaliUI-VF");
-                    put("bn", "NotoSansBengaliUI-VF");
+                    put("as", "NotoSansBengaliUI-Regular");
+                    put("bn", "NotoSansBengaliUI-Regular");
                     put("fa", "NotoNaskhArabicUI-Regular");
                     put("gu", "NotoSansGujaratiUI-Regular");
-                    put("hi", "NotoSansDevanagariUI-VF");
-                    put("hy", "NotoSansArmenian-VF");
+                    put("hi", "NotoSansDevanagariUI-Regular");
+                    put("hy", "NotoSansArmenian-Regular");
                     put("iw", "NotoSansHebrew-Regular");
                     put("ja", "NotoSansCJK-Regular");
                     put("ka", "NotoSansGeorgian-VF");
                     put("ko", "NotoSansCJK-Regular");
                     put("km", "NotoSansKhmerUI-Regular");
-                    put("kn", "NotoSansKannadaUI-VF");
+                    put("kn", "NotoSansKannadaUI-Regular");
                     put("lo", "NotoSansLaoUI-Regular");
-                    put("ml", "NotoSansMalayalamUI-VF");
-                    put("mr", "NotoSansDevanagariUI-VF");
+                    put("ml", "NotoSansMalayalamUI-Regular");
+                    put("mr", "NotoSansDevanagariUI-Regular");
                     put("my", "NotoSansMyanmarUI-Regular");
-                    put("ne", "NotoSansDevanagariUI-VF");
+                    put("ne", "NotoSansDevanagariUI-Regular");
                     put("or", "NotoSansOriya-Regular");
-                    put("pa", "NotoSansGurmukhiUI-VF");
-                    put("si", "NotoSansSinhalaUI-VF");
-                    put("ta", "NotoSansTamilUI-VF");
-                    put("te", "NotoSansTeluguUI-VF");
+                    put("pa", "NotoSansGurmukhiUI-Regular");
+                    put("si", "NotoSansSinhala-Regular");
+                    put("ta", "NotoSansTamilUI-Regular");
+                    put("te", "NotoSansTeluguUI-Regular");
                     put("th", "NotoSansThaiUI-Regular");
                     put("ur", "NotoNaskhArabicUI-Regular");
                     put("zh", "NotoSansCJK-Regular");

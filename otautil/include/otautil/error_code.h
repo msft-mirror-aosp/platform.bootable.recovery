@@ -22,7 +22,7 @@ enum ErrorCode : int {
   kLowBattery = 20,
   kZipVerificationFailure,
   kZipOpenFailure,
-  kBootreasonInBlocklist,
+  kBootreasonInBlacklist,
   kPackageCompatibilityFailure,
   kScriptExecutionFailure,
   kMapFileFailure,

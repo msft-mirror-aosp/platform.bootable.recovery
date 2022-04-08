@@ -25,6 +25,7 @@
 
 #include <android-base/properties.h>
 
+#include "graphics_adf.h"
 #include "graphics_drm.h"
 #include "graphics_fbdev.h"
 #include "minui/minui.h"
@@ -361,8 +362,13 @@ int gr_init() {
            ret);
   }
 
-  auto backend = std::unique_ptr<MinuiBackend>{ std::make_unique<MinuiBackendDrm>() };
+  auto backend = std::unique_ptr<MinuiBackend>{ std::make_unique<MinuiBackendAdf>() };
   gr_draw = backend->Init();
+
+  if (!gr_draw) {
+    backend = std::make_unique<MinuiBackendDrm>();
+    gr_draw = backend->Init();
+  }
 
   if (!gr_draw) {
     backend = std::make_unique<MinuiBackendFbdev>();

@@ -12,15 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "bootable_recovery_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["bootable_recovery_license"],
-}
-
 cc_defaults {
     name: "recovery_test_defaults",
 
@@ -40,6 +31,7 @@ cc_defaults {
         "libpng",
         "libprocessgroup",
         "libselinux",
+        "libz",
         "libziparchive",
     ],
 
@@ -73,7 +65,7 @@ libapplypatch_static_libs = [
     "libbase",
     "libbrotli",
     "libbz",
-    "libz_stable",
+    "libz",
     "libziparchive",
 ]
 
@@ -103,24 +95,6 @@ librecovery_static_libs = [
     "libc++fs",
 ]
 
-// recovery image for unittests.
-// ========================================================
-genrule {
-    name: "recovery_image",
-    cmd: "cat $(location testdata/recovery_head) <(cat $(location testdata/recovery_body) | $(location minigzip)) $(location testdata/recovery_tail) > $(out)",
-    srcs: [
-        "testdata/recovery_head",
-        "testdata/recovery_body",
-        "testdata/recovery_tail",
-    ],
-    tools: [
-        "minigzip",
-    ],
-    out: [
-        "testdata/recovery.img",
-    ],
-}
-
 cc_test {
     name: "recovery_unit_test",
     isolated: true,
@@ -148,15 +122,12 @@ cc_test {
         "libupdater_core",
         "libupdate_verifier",
 
+        "libgtest_prod",
         "libprotobuf-cpp-lite",
-    ],
-    header_libs: [
-        "libgtest_prod_headers",
     ],
 
     data: [
         "testdata/*",
-        ":recovery_image",
         ":res-testdata",
     ],
 }
@@ -210,24 +181,4 @@ cc_test_host {
             enabled: false,
         },
     },
-}
-
-cc_fuzz {
-    name: "libinstall_verify_package_fuzzer",
-    defaults: [
-        "recovery_test_defaults",
-    ],
-
-    srcs: ["fuzz/verify_package_fuzzer.cpp"],
-
-    corpus: [
-      "testdata/otasigned*.zip",
-    ],
-
-    static_libs: [
-        "libotautil",
-        "libinstall",
-        "librecovery_ui",
-        "libminui",
-    ],
 }

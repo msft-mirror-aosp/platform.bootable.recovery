@@ -60,7 +60,7 @@ struct Value {
     BLOB = 2,
   };
 
-  Value(Type type, std::string str) : type(type), data(std::move(str)) {}
+  Value(Type type, const std::string& str) : type(type), data(str) {}
 
   Type type;
   std::string data;

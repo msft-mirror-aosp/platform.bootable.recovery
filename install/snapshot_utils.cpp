@@ -32,7 +32,7 @@ bool FinishPendingSnapshotMerges(Device* device) {
   }
 
   RecoveryUI* ui = device->GetUI();
-  auto sm = SnapshotManager::New();
+  auto sm = SnapshotManager::NewForFirstStageMount();
   if (!sm) {
     ui->Print("Could not create SnapshotManager.\n");
     return false;
@@ -57,7 +57,7 @@ bool CreateSnapshotPartitions() {
     return true;
   }
 
-  auto sm = SnapshotManager::New();
+  auto sm = SnapshotManager::NewForFirstStageMount();
   if (!sm) {
     // SnapshotManager could not be created. The device is still in a
     // consistent state and can continue with the mounting of the existing
