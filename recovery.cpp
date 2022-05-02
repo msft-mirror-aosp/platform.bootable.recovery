@@ -789,6 +789,18 @@ Device::BuiltinAction start_recovery(Device* device, const std::vector<std::stri
         if (IsRoDebuggable()) {
           ui->ShowText(true);
         }
+      } else if (should_wipe_data) {
+        save_current_log = true;
+        CHECK(device->GetReason().has_value());
+        bool convert_fbe = device->GetReason().value() == "convert_fbe";
+        if (!WipeData(device, convert_fbe)) {
+          status = INSTALL_ERROR;
+        }
+      } else if (should_wipe_cache) {
+        save_current_log = true;
+        if (!WipeCache(ui, nullptr)) {
+          status = INSTALL_ERROR;
+        }
       }
     }
   } else if (should_wipe_data) {
