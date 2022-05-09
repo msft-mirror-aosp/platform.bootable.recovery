@@ -1587,8 +1587,16 @@ int main(int argc, char **argv) {
 
       status = install_package(update_package, &should_wipe_cache, TEMPORARY_INSTALL_FILE, true,
                                retry_count);
-      if (status == INSTALL_SUCCESS && should_wipe_cache) {
-        wipe_cache(false, device);
+      if (status == INSTALL_SUCCESS) {
+        if (should_wipe_data) {
+            if (!wipe_data(device)) {
+              status = INSTALL_ERROR;
+            }
+        } else if (should_wipe_cache) {
+            if (!wipe_cache(false, device)) {
+                status = INSTALL_ERROR;
+            }
+        }
       }
       if (status != INSTALL_SUCCESS) {
         ui->Print("Installation aborted.\n");

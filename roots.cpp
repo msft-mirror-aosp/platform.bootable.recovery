@@ -303,16 +303,27 @@ int format_volume(const char* volume, const char* directory) {
     }
 
     int result = exec_cmd(mke2fs_args);
-    if (result == 0 && directory != nullptr) {
-      std::vector<std::string> e2fsdroid_args = {
-        "/sbin/e2fsdroid_static",
-        "-e",
-        "-f",
-        directory,
-        "-a",
-        volume,
-        v->blk_device,
-      };
+    if (result == 0) {
+      std::vector<std::string> e2fsdroid_args;
+      if (directory != nullptr) {
+        e2fsdroid_args = {
+          "/sbin/e2fsdroid_static",
+          "-e",
+          "-f",
+          directory,
+          "-a",
+          volume,
+          v->blk_device,
+        };
+      } else {
+        e2fsdroid_args = {
+          "/sbin/e2fsdroid_static",
+          "-e",
+          "-a",
+          volume,
+          v->blk_device,
+        };
+      }
       result = exec_cmd(e2fsdroid_args);
     }
 
@@ -343,15 +354,24 @@ int format_volume(const char* volume, const char* directory) {
   }
 
   int result = exec_cmd(make_f2fs_cmd);
-  if (result == 0 && directory != nullptr) {
+  if (result == 0) {
     cmd = "/sbin/sload.f2fs";
+    std::vector<std::string> sload_f2fs_cmd;
     // clang-format off
-    std::vector<std::string> sload_f2fs_cmd = {
-      cmd,
-      "-f", directory,
-      "-t", volume,
-      v->blk_device,
-    };
+    if (directory != nullptr) {
+      sload_f2fs_cmd = {
+        cmd,
+        "-f", directory,
+        "-t", volume,
+        v->blk_device,
+      };
+    } else {
+      sload_f2fs_cmd = {
+        cmd,
+        "-t", volume,
+        v->blk_device,
+      };
+    }
     // clang-format on
     result = exec_cmd(sload_f2fs_cmd);
   }
