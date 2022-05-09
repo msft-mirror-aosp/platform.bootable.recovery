@@ -48,6 +48,7 @@ class SimulatorRuntime : public UpdaterRuntimeInterface {
 
   int WipeBlockDevice(const std::string_view filename, size_t len) const override;
   int RunProgram(const std::vector<std::string>& args, bool is_vfork) const override;
+  int RunProgram(const std::vector<std::string>& args, std::string* result) const override;
   int Tune2Fs(const std::vector<std::string>& args) const override;
 
   bool MapPartitionOnDeviceMapper(const std::string& partition_name, std::string* path) override;
