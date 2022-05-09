@@ -64,6 +64,10 @@ class UpdaterRuntimeInterface {
   // Starts a child process and runs the program with |args|. Uses vfork(2) if |is_vfork| is true.
   virtual int RunProgram(const std::vector<std::string>& args, bool is_vfork) const = 0;
 
+  // Starts a child process and runs the program with |args|.
+  // |stdout| and |stderr| will be stored in |result|.
+  virtual int RunProgram(const std::vector<std::string>& args, std::string* result) const = 0;
+
   // Runs tune2fs with arguments |args|.
   virtual int Tune2Fs(const std::vector<std::string>& args) const = 0;
 

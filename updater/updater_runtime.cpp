@@ -182,6 +182,57 @@ int UpdaterRuntime::RunProgram(const std::vector<std::string>& args, bool is_vfo
   return status;
 }
 
+int UpdaterRuntime::RunProgram(const std::vector<std::string>& args, std::string* result) const {
+  CHECK(!args.empty());
+  CHECK(result != nullptr);
+  int fd[2];
+  auto argv = StringVectorToNullTerminatedArray(args);
+
+  LOG(INFO) << "run_program: [" << args[0] << "] with " << argv.size() << " args";
+
+  *result = "";
+
+  if (pipe(fd) == -1) {
+    LOG(INFO) << "run_program: pipe() failed";
+    exit(EXIT_FAILURE);
+  }
+
+  pid_t child = fork();
+  if (child == 0) {
+    // Redirect stdout/stderr to the parent process
+    dup2(fd[1], STDOUT_FILENO);
+    dup2(fd[1], STDERR_FILENO);
+    close(fd[0]); // close unused read end
+    execv(argv[0], argv.data());
+    PLOG(ERROR) << "run_program: execv() failed";
+    _exit(EXIT_FAILURE);
+  }
+
+  close(fd[1]); // close unused write end
+  static constexpr int MAX_BUF = 64;
+  char buf[MAX_BUF];
+
+  while (true) {
+    size_t count = read(fd[0], buf, MAX_BUF);
+    if (count <= 0)
+      break;
+    result->append(buf, count);
+  }
+  close(fd[0]); // close read end
+
+  int status;
+  waitpid(child, &status, 0);
+  if (WIFEXITED(status)) {
+    if (WEXITSTATUS(status) != 0) {
+      LOG(ERROR) << "run_program: child exited with status " << WEXITSTATUS(status);
+    }
+  } else if (WIFSIGNALED(status)) {
+    LOG(ERROR) << "run_program: child terminated by signal " << WTERMSIG(status);
+  }
+
+  return status;
+}
+
 int UpdaterRuntime::Tune2Fs(const std::vector<std::string>& args) const {
   auto tune2fs_args = StringVectorToNullTerminatedArray(args);
   // tune2fs changes the filesystem parameters on an ext2 filesystem; it returns 0 on success.
