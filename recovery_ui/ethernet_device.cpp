@@ -30,12 +30,10 @@
 #include "recovery_ui/ethernet_device.h"
 #include "recovery_ui/ethernet_ui.h"
 
-// Android TV defaults to eth0 for it's interface
-EthernetDevice::EthernetDevice(EthernetRecoveryUI* ui) : EthernetDevice(ui, "eth0") {}
+const std::string EthernetDevice::interface = "eth0";
 
-// Allow future users to define the interface as they prefer
-EthernetDevice::EthernetDevice(EthernetRecoveryUI* ui, std::string interface)
-    : Device(ui), ctl_sock_(socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)), interface_(interface) {
+EthernetDevice::EthernetDevice(EthernetRecoveryUI* ui)
+    : Device(ui), ctl_sock_(socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0)) {
   if (ctl_sock_ < 0) {
     PLOG(ERROR) << "Failed to open socket";
   }
@@ -65,7 +63,7 @@ int EthernetDevice::SetInterfaceFlags(const unsigned set, const unsigned clr) {
   }
 
   memset(&ifr, 0, sizeof(struct ifreq));
-  strncpy(ifr.ifr_name, interface_.c_str(), IFNAMSIZ);
+  strncpy(ifr.ifr_name, interface.c_str(), IFNAMSIZ);
   ifr.ifr_name[IFNAMSIZ - 1] = 0;
 
   if (ioctl(ctl_sock_, SIOCGIFFLAGS, &ifr) < 0) {
@@ -98,7 +96,7 @@ void EthernetDevice::SetTitleIPv6LinkLocalAddress(const bool interface_up) {
 
   std::unique_ptr<struct ifaddrs, decltype(&freeifaddrs)> guard{ ifaddr, freeifaddrs };
   for (struct ifaddrs* ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
-    if (ifa->ifa_addr->sa_family != AF_INET6 || interface_ != ifa->ifa_name) {
+    if (ifa->ifa_addr->sa_family != AF_INET6 || interface != ifa->ifa_name) {
       continue;
     }
 
