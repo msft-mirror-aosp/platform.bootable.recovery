@@ -102,6 +102,7 @@ enum class PixelFormat : int {
   RGBX = 2,
   BGRA = 3,
   ARGB = 4,
+  RGBA = 5, // LSB Alpha
 };
 
 enum class GraphicsBackend : int {
@@ -128,6 +129,7 @@ int gr_fb_height();
 void gr_flip();
 void gr_fb_blank(bool blank);
 void gr_fb_blank(bool blank, int index);
+bool gr_has_multiple_connectors();
 
 // Clears entire surface to current color.
 void gr_clear();
