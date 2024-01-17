@@ -197,7 +197,7 @@ int format_volume(const std::string& volume, const std::string& directory,
     }
   }
 
-  if (new_fstype == "ext4") {
+  if ((v->fs_type == "ext4" && new_fstype.empty()) || new_fstype == "ext4") {
     LOG(INFO) << "Formatting " << v->blk_device << " as ext4";
     static constexpr int kBlockSize = 4096;
     std::vector<std::string> mke2fs_args = {
