@@ -130,7 +130,7 @@ static std::vector<std::string> get_args(const int argc, char** const argv, std:
         // Skip empty and '\0'-filled tokens.
         if (!it->empty() && (*it)[0] != '\0') args.push_back(std::move(*it));
       }
-      LOG(INFO) << "Got " << args.size() << " arguments from boot message";
+      LOG(INFO) << "Got " << args.size() << " arguments from boot message " << android::base::Join(args, ", ");
     } else if (boot.recovery[0] != 0) {
       LOG(ERROR) << "Bad boot message: \"" << boot_recovery << "\"";
     }
@@ -484,8 +484,6 @@ int main(int argc, char** argv) {
         LOG(ERROR) << "Failed to set USB config to " << usb_config;
       }
     }
-
-    ui->SetEnableFastbootdLogo(fastboot);
 
     auto ret = fastboot ? StartFastboot(device, args) : start_recovery(device, args);
 
